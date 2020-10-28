@@ -56,6 +56,7 @@ class EventsGenerator
             // Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER.
             // Если это критично, то можно добавить проверку при генерации $eventsNumber.
             $eventsCount += $eventsNumber;
+            echo 'Generated ' . $eventsNumber . ' events for account #' . $accountID;
         }
 
         $this->release();
