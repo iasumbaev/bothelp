@@ -53,6 +53,8 @@ class EventsGenerator
                 $this->client->rpush('events', [new Event($accountID, $i)]);
             }
 
+            $this->client->set('last_event_id_' . $accountID, $iMax);
+
             // Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER.
             // Если это критично, то можно добавить проверку при генерации $eventsNumber.
             $eventsCount += $eventsNumber;
