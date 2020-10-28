@@ -24,6 +24,34 @@ class EventHandler
     }
 
     /**
+     * Добавление события в пул событий аккаунтов
+     * @param $accountID - ID аккаунта
+     * @param $eventID - ID события
+     */
+    private function addEventToAccountPoll($accountID, $eventID): void
+    {
+        $this->client->sadd('account_' . $accountID, $eventID);
+    }
+
+    /**
+     * Проверка на то, что событие можно исполнить
+     * @param $accountID - ID аккаунта
+     * @param $eventID - ID события
+     * @return bool
+     */
+    private function isExecutable($accountID, $eventID)
+    {
+
+        $pool = $this->client->smembers('account_' . $accountID);
+        $pool = array_map('intval', $pool);
+        sort($pool);
+
+        // Если событие первое в пуле, то его можно выполнить
+        return $pool[0] === (int)$eventID;
+
+    }
+
+    /**
      * Проверка есть ли ещё необработанные события
      */
     private function isQueueEmpty(): bool
@@ -43,11 +71,11 @@ class EventHandler
 
     /**
      * Блокировка аккаунта для выполнения событий
-     * @param $id - ID аккаунта
+     * @param $accountID - ID аккаунта
      */
-    private function lockAccount($id): void
+    private function lockAccount($accountID): void
     {
-        $this->client->set('lock_' . $id, true);
+        $this->client->set('lock_' . $accountID, true);
     }
 
     public function execute(): void
@@ -56,7 +84,9 @@ class EventHandler
             //lpop вернёт accountID:eventID
             [$accountID, $eventID] = explode(':', $this->client->lpop('events'));
 
-            while ($this->hasLock($accountID)) {
+            $this->addEventToAccountPoll($accountID, $eventID);
+
+            while ($this->hasLock($accountID) || !$this->isExecutable($accountID, $eventID)) {
                 usleep(100);
             }
 
