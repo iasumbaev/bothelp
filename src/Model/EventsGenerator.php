@@ -42,7 +42,8 @@ class EventsGenerator
             $accountID = random_int(0, $this->accountsNumber);
             $eventsNumber = random_int(0, $this->limitEventOnAccount);
 
-            //Если до этого был использован такой же аккаунт, надо сохранить количество событий, чтобы id событий не повторялись
+            //Если до этого был использован такой же аккаунт, надо сохранить количество событий,
+            // чтобы id событий не повторялись для одного аккаунта
             //TODO: use redis
             if (isset($accountIDs[$accountID])) {
                 $adding = $accountIDs[$accountID];
