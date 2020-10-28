@@ -17,3 +17,6 @@ $channel->queue_declare('event_queue', false, true, false, false);
 
 $generator = new EventsGenerator(EVENTS_NUMBER, ACCOUNTS_NUMBER, LIMIT_EVENT_ON_ACCOUNT, $channel);
 $generator->generate();
+
+$channel->close();
+$connection->close();
