@@ -44,13 +44,10 @@ class EventsGenerator
 
             $events = [];
             for ($i = 1; $i < $eventsNumber; $i++) {
-                $events[] = new Event($accountID, $i);
+                $events[] = (string)(new Event($accountID, $i));
             }
 
-            $msg = new AMQPMessage(
-                $events,
-                array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT)
-            );
+            $msg = new AMQPMessage(implode(',', $events));
 
             $this->channel->basic_publish($msg, '', 'event_queue');
 
