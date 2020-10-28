@@ -5,9 +5,9 @@ require_once __DIR__ . '/vendor/autoload.php';
 use App\Model\EventsGenerator;
 use Predis\Client;
 
-const EVENTS_NUMBER = 10000;
-const ACCOUNTS_NUMBER = 1000;
-const LIMIT_EVENT_ON_ACCOUNT = 10;
+const EVENTS_NUMBER = 100;
+const ACCOUNTS_NUMBER = 10;
+const LIMIT_EVENT_ON_ACCOUNT = 5;
 
 $client = new Client([
     'host' => 'localhost',
