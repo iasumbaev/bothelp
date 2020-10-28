@@ -5,6 +5,7 @@ namespace App\Model;
 
 
 use PhpAmqpLib\Channel\AMQPChannel;
+use PhpAmqpLib\Connection\AMQPStreamConnection;
 
 class EventHandler
 {
@@ -12,10 +13,17 @@ class EventHandler
      * @var AMQPChannel
      */
     private $channel;
+    /**
+     * @var AMQPStreamConnection
+     */
+    private $connection;
 
-    public function __construct(AMQPChannel $channel)
+
+
+    public function __construct()
     {
-        $this->channel = $channel;
+        $this->connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
+        $this->channel = $this->connection->channel();
     }
 
     public function execute()
@@ -35,5 +43,11 @@ class EventHandler
         $this->channel->basic_qos(null, 1, null);
         $this->channel->basic_consume('event_queue', '', false, false, false, false, $callback);
 
+        while (count($this->channel->callbacks)) {
+            $this->channel->wait();
+        }
+
+        $this->channel->close();
+        $this->connection->close();
     }
 }

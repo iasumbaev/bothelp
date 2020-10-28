@@ -53,7 +53,7 @@ class EventsGenerator
             }
 
             $events = [];
-            for ($i = 1; $i < $eventsNumber; $i++) {
+            for ($i = 0; $i < $eventsNumber; $i++) {
                 $events[] = (string)(new Event($accountID, $adding + $i));
             }
 
