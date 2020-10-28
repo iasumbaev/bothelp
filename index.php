@@ -14,13 +14,13 @@ $client = new Client([
     'port' => 6379,
 ]);
 
-for ($i = 0; $i < 256 && $this->client->llen('events') !== 0; $i++) {
+for ($i = 0; $i < 256 && $client->llen('events') !== 0; $i++) {
     echo 'Action: ' . $i . PHP_EOL;
     action();
 }
 
 // Ожидание, пока обработчики не закончат работу
-while ($this->client->llen('events') !== 0)
+while ($client->llen('events') !== 0)
 {
     continue;
 }
