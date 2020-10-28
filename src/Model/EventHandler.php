@@ -35,8 +35,5 @@ class EventHandler
         $this->channel->basic_qos(null, 1, null);
         $this->channel->basic_consume('event_queue', '', false, false, false, false, $callback);
 
-        while ($this->channel->is_consuming()) {
-            $this->channel->wait();
-        }
     }
 }
