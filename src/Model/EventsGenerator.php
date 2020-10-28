@@ -44,7 +44,6 @@ class EventsGenerator
 
             //Если до этого был использован такой же аккаунт, надо сохранить количество событий,
             // чтобы id событий не повторялись для одного аккаунта
-            //TODO: use redis
             $lastEventID = $this->client->get('last_event_id_' . $accountID);
             if (is_null($lastEventID)) {
                 $lastEventID = 0;

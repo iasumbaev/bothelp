@@ -11,7 +11,7 @@ const ACCOUNTS_NUMBER = 1000;
 const LIMIT_EVENT_ON_ACCOUNT = 10;
 
 $client = new Client([
-    'host' => 'redis',
+    'host' => 'localhost',
     'port' => 6379,
 ]);
 
