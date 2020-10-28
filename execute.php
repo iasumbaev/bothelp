@@ -14,6 +14,3 @@ for ($i = 0; $i < 10; $i++) {
    $handler =  new EventHandler($channel);
    $handler->execute();
 }
-
-$channel->close();
-$connection->close();
