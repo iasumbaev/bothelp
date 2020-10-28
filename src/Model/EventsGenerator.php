@@ -50,10 +50,10 @@ class EventsGenerator
             $events = [];
             $iMax = $eventsNumber + $lastEventID;
             for ($i = $lastEventID; $i < $iMax; $i++) {
-                $events[] = new Event($accountID, $i);
+                $events[] = (string)new Event($accountID, $i);
             }
 
-            $this->client->rpush('events', ...$events);
+            $this->client->rpush('events', $events);
 
             //Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER. Если это критично, то можно добавить проверку при генерации $eventsNumber.
             $eventsCount += $eventsNumber;
