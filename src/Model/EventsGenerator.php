@@ -2,8 +2,6 @@
 
 namespace App\Model;
 
-use PhpAmqpLib\Message\AMQPMessage;
-use PhpAmqpLib\Channel\AMQPChannel;
 use Predis\Client;
 
 class EventsGenerator
@@ -55,8 +53,7 @@ class EventsGenerator
                 $events[] = new Event($accountID, $i);
             }
 
-            //todo: add events to redis queue
-            $this->client->rpush('events', $events);
+            $this->client->rpush('events', ...$events);
 
             //Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER. Если это критично, то можно добавить проверку при генерации $eventsNumber.
             $eventsCount += $eventsNumber;
