@@ -2,7 +2,10 @@
 
 
 require_once __DIR__ . '/vendor/autoload.php';
+
+use Model\EventsGenerator;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
+
 
 
 const EVENTS_NUMBER = 10000;

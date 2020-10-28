@@ -1,5 +1,7 @@
 <?php
 
+namespace Model;
+
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Channel\AMQPChannel;
 
