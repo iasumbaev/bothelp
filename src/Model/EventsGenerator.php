@@ -26,6 +26,7 @@ class EventsGenerator
     public function __construct(int $eventsNumber, int $accountsNumber, int $limitEventOnAccount, Client $client)
     {
         $this->eventsNumber = $eventsNumber;
+        // -1 для ограничений цикла, т.к. будем считать с 0
         $this->accountsNumber = $accountsNumber;
         $this->limitEventOnAccount = $limitEventOnAccount;
         $this->client = $client;
@@ -54,8 +55,19 @@ class EventsGenerator
             // Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER.
             // Если это критично, то можно добавить проверку при генерации $eventsNumber.
             $eventsCount += $eventsNumber;
+        }
 
-            $this->client->set('last_event_id_' . $accountID, $iMax);
+        $this->release();
+    }
+
+
+    /**
+     * Очищаем redis от ключей вида last_event_id_ID, т.к. они использовались только для генерации
+     */
+    private function release(): void
+    {
+        for ($i = 0; $i < $this->accountsNumber; $i++) {
+            $this->client->del('last_event_id_' . $i);
         }
     }
 }
