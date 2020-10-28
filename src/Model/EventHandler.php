@@ -26,6 +26,7 @@ class EventHandler
                 foreach ($events as $index => $event) {
                     file_put_contents('log.txt', $event . PHP_EOL, FILE_APPEND);
                 }
+                return true;
             }
             return false;
         };
