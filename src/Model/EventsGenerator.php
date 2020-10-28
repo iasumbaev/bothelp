@@ -26,8 +26,8 @@ class EventsGenerator
     public function __construct(int $eventsNumber, int $accountsNumber, int $limitEventOnAccount, Client $client)
     {
         $this->eventsNumber = $eventsNumber;
-        // -1 для ограничений цикла, т.к. будем считать с 0
-        $this->accountsNumber = $accountsNumber;
+        // -1 т.к. будем считать с 0
+        $this->accountsNumber = $accountsNumber - 1;
         $this->limitEventOnAccount = $limitEventOnAccount;
         $this->client = $client;
     }
@@ -37,7 +37,7 @@ class EventsGenerator
         $eventsCount = 0;
         while ($eventsCount < $this->eventsNumber) {
 
-            $accountID = random_int(1, $this->accountsNumber);
+            $accountID = random_int(0, $this->accountsNumber);
             $eventsNumber = random_int(1, $this->limitEventOnAccount);
 
             // Если до этого был использован такой же аккаунт, надо сохранить количество событий,
