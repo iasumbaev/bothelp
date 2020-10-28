@@ -21,8 +21,8 @@ class EventHandler
     public function execute()
     {
         $callback = function ($msg) {
-            if ($msg) {
-                $events = explode(',', $msg);
+            if ($msg->body) {
+                $events = explode(',', $msg->body);
                 foreach ($events as $index => $event) {
                     file_put_contents('log.txt', $event . PHP_EOL);
                 }
