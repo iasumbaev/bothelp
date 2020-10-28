@@ -49,6 +49,7 @@ class EventsGenerator
 
             $iMax = $eventsNumber + $lastEventID;
             for ($i = $lastEventID; $i < $iMax; $i++) {
+                // Добавляем события в очередь в формате accountID:eventID
                 $this->client->rpush('events', [new Event($accountID, $i)]);
             }
 
