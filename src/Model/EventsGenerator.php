@@ -40,7 +40,7 @@ class EventsGenerator
             $accountID = random_int(0, $this->accountsNumber);
             $eventsNumber = random_int(0, $this->limitEventOnAccount);
 
-            //Если до этого был использован такой же аккаунт, надо сохранить количество событий,
+            // Если до этого был использован такой же аккаунт, надо сохранить количество событий,
             // чтобы id событий не повторялись для одного аккаунта
             $lastEventID = $this->client->get('last_event_id_' . $accountID);
             if (is_null($lastEventID)) {
@@ -50,12 +50,13 @@ class EventsGenerator
             $events = [];
             $iMax = $eventsNumber + $lastEventID;
             for ($i = $lastEventID; $i < $iMax; $i++) {
-                $events[] = (string)new Event($accountID, $i);
+                $events[] = (string)(new Event($accountID, $i));
             }
 
             $this->client->rpush('events', $events);
 
-            //Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER. Если это критично, то можно добавить проверку при генерации $eventsNumber.
+            // Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER.
+            // Если это критично, то можно добавить проверку при генерации $eventsNumber.
             $eventsCount += $eventsNumber;
         }
     }
