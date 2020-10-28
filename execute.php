@@ -11,6 +11,7 @@ $channel = $connection->channel();
 $channel->queue_declare('event_queue', false, true, false, false);
 
 for ($i = 0; $i < 10; $i++) {
-   $handler =  new EventHandler($channel);
-   $handler->execute();
+    echo 'Start handler: ' . $i;
+    $handler = new EventHandler($channel);
+    $handler->execute();
 }
