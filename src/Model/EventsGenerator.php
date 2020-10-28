@@ -36,15 +36,25 @@ class EventsGenerator
     public function generate()
     {
         $eventsCount = 0;
-
+        $accountIDs = [];
         while ($eventsCount < $this->eventsNumber) {
 
             $accountID = random_int(0, $this->accountsNumber);
             $eventsNumber = random_int(0, $this->limitEventOnAccount);
 
+            //Если до этого был использован такой же аккаунт, надо сохранить количество событий, чтобы id событий не повторялись
+            //TODO: use redis
+            if (isset($accountIDs[$accountID])) {
+                $adding = $accountIDs[$accountID];
+                $accountIDs[$accountID] += $eventsNumber;
+            } else {
+                $adding = 0;
+                $accountIDs[$accountID] = $eventsNumber;
+            }
+
             $events = [];
             for ($i = 1; $i < $eventsNumber; $i++) {
-                $events[] = (string)(new Event($accountID, $i));
+                $events[] = (string)(new Event($accountID, $adding + $i));
             }
 
             $msg = new AMQPMessage(implode(',', $events));

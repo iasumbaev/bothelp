@@ -21,10 +21,13 @@ class EventHandler
     public function execute()
     {
         $callback = function ($msg) {
-            echo ' [x] Received ', $msg->body, "\n";
-            sleep(substr_count($msg->body, '.'));
-            echo " [x] Done\n";
-            $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
+            if ($msg) {
+                $events = explode(',', $msg);
+                foreach ($events as $index => $event) {
+                    file_put_contents('log.txt', $event . PHP_EOL);
+                }
+            }
+            return false;
         };
 
         $this->channel->basic_qos(null, 1, null);
