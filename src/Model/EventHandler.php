@@ -39,7 +39,7 @@ class EventHandler
      * @param $eventID - ID события
      * @return bool
      */
-    private function isExecutable($accountID, $eventID)
+    private function isExecutable($accountID, $eventID): bool
     {
 
         $pool = $this->client->smembers('account_' . $accountID);
@@ -96,16 +96,18 @@ class EventHandler
 
             $this->logger->log($accountID, $eventID);
 
-            $this->release($accountID);
+            $this->release($accountID, $eventID);
         }
     }
 
     /**
-     * Снятие блокировки с аккаунта и удаление ключа из redis
-     * @param $id - ID аккаунта
+     * Снятие блокировки с аккаунта и удаление события из пула
+     * @param $accountID - ID аккаунта
+     * @param $eventID - ID события
      */
-    private function release($id): void
+    private function release($accountID, $eventID): void
     {
-        $this->client->del('lock_' . $id);
+        $this->client->del('lock_' . $accountID);
+        $this->client->srem('account_' . $accountID, $eventID);
     }
 }
