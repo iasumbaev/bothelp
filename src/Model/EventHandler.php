@@ -26,6 +26,7 @@ class EventHandler
                 foreach ($events as $index => $event) {
                     file_put_contents('log.txt', $event . PHP_EOL, FILE_APPEND);
                 }
+                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
                 return true;
             }
             return false;
