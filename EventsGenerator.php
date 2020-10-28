@@ -1,5 +1,7 @@
 <?php
 
+use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Channel\AMQPChannel;
 
 class EventsGenerator
 {
@@ -15,13 +17,18 @@ class EventsGenerator
      * @var int
      */
     private $limitEventOnAccount;
+    /**
+     * @var AMQPChannel
+     */
+    private $channel;
 
-    public function __construct(int $eventsNumber, int $accountsNumber, int $limitEventOnAccount)
+    public function __construct(int $eventsNumber, int $accountsNumber, int $limitEventOnAccount, AMQPChannel $channel)
     {
         $this->eventsNumber = $eventsNumber;
         // -1 для ограничений цикла, т.к. будем считать с 0
         $this->accountsNumber = $accountsNumber - 1;
         $this->limitEventOnAccount = $limitEventOnAccount -1;
+        $this->channel = $channel;
     }
 
     public function generate() {
@@ -37,7 +44,12 @@ class EventsGenerator
                 $events[] =  new Event($accountID, $i);
             }
 
-            //TODO:add events to queue
+            $msg = new AMQPMessage(
+                $events,
+                array('delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT)
+            );
+
+            $this->channel->basic_publish($msg, '', 'event_queue');
 
             //Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER. Если это критично, то можно добавить проверку при генерации $eventsNumber.
             $eventsCount += $eventsNumber;
