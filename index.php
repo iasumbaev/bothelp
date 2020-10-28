@@ -16,8 +16,8 @@ $client = new Client([
 
 file_put_contents('log.txt', '');
 
+$start = microtime(true);
 for ($i = 0; $i < 1000 && $client->llen('events') !== 0; $i++) {
-    echo 'Action: ' . $i . PHP_EOL;
     action();
 }
 
@@ -26,4 +26,4 @@ while ($client->llen('events') !== 0) {
     continue;
 }
 
-echo 'Done!' . PHP_EOL;
+echo 'Done! Time: ' . microtime(true) - $start . PHP_EOL;
