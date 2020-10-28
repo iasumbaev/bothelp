@@ -29,11 +29,12 @@ class EventsGenerator
         $this->eventsNumber = $eventsNumber;
         // -1 для ограничений цикла, т.к. будем считать с 0
         $this->accountsNumber = $accountsNumber - 1;
-        $this->limitEventOnAccount = $limitEventOnAccount -1;
+        $this->limitEventOnAccount = $limitEventOnAccount - 1;
         $this->channel = $channel;
     }
 
-    public function generate() {
+    public function generate()
+    {
         $eventsCount = 0;
 
         while ($eventsCount < $this->eventsNumber) {
@@ -43,7 +44,7 @@ class EventsGenerator
 
             $events = [];
             for ($i = 1; $i < $eventsNumber; $i++) {
-                $events[] =  new Event($accountID, $i);
+                $events[] = new Event($accountID, $i);
             }
 
             $msg = new AMQPMessage(
