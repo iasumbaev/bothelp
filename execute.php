@@ -1,17 +1,16 @@
 <?php
 
+use App\Model\EventHandler;
+use App\Model\Logger;
+use Predis\Client;
+
 require_once __DIR__ . '/vendor/autoload.php';
 
-use App\Model\EventHandler;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
 
-$connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
-$channel = $connection->channel();
+$client = new Client([
+    'host' => 'localhost',
+    'port' => 6379,
+]);
 
-$channel->queue_declare('event_queue', false, true, false, false);
-
-for ($i = 0; $i < 10; $i++) {
-    echo 'Start handler: ' . $i;
-    $handler = new EventHandler();
-    $handler->execute();
-}
+$handler = new EventHandler($client, new Logger());
+$handler->execute();

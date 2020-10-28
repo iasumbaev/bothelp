@@ -3,51 +3,79 @@
 
 namespace App\Model;
 
-
-use PhpAmqpLib\Channel\AMQPChannel;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
+use Predis\Client;
 
 class EventHandler
 {
+
     /**
-     * @var AMQPChannel
+     * @var Client
      */
-    private $channel;
+    private $client;
     /**
-     * @var AMQPStreamConnection
+     * @var Logger
      */
-    private $connection;
+    private $logger;
 
-
-
-    public function __construct()
+    public function __construct(Client $client, Logger $logger)
     {
-        $this->connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
-        $this->channel = $this->connection->channel();
+        $this->client = $client;
+        $this->logger = $logger;
     }
 
-    public function execute()
+    /**
+     * Проверка есть ли ещё необработанные события
+     */
+    private function isQueueEmpty(): bool
     {
-        $callback = function ($msg) {
-            if ($msg->body) {
-                $events = explode(',', $msg->body);
-                foreach ($events as $index => $event) {
-                    file_put_contents('log.txt', $event . PHP_EOL, FILE_APPEND);
-                }
-                $msg->delivery_info['channel']->basic_ack($msg->delivery_info['delivery_tag']);
-                return true;
+        return $this->client->llen('events') === 0;
+    }
+
+    /**
+     * Проверка есть ли блокировка на аккаунт
+     * @param $id - ID аккаунта
+     * @return int - 1 если аккаунт заблокирован, иначе 0
+     */
+    private function hasLock($id): int
+    {
+        return $this->client->exists('lock_' . $id);
+    }
+
+    /**
+     * Блокировка аккаунта для выполнения событий
+     * @param $id - ID аккаунта
+     */
+    private function lockAccount($id): void
+    {
+        $this->client->set('lock_' . $id, true);
+    }
+
+    public function execute(): void
+    {
+        while (!$this->isQueueEmpty()) {
+            //lpop вернёт accountID:eventID
+            [$accountID, $eventID] = explode(':', $this->client->lpop('events'));
+
+            while ($this->hasLock($accountID)) {
+                usleep(100);
             }
-            return false;
-        };
 
-        $this->channel->basic_qos(null, 1, null);
-        $this->channel->basic_consume('event_queue', '', false, false, false, false, $callback);
+            $this->lockAccount($accountID);
 
-        while (count($this->channel->callbacks)) {
-            $this->channel->wait();
+            sleep(1);
+
+            $this->logger->log($accountID, $eventID);
+
+            $this->release($accountID);
         }
+    }
 
-        $this->channel->close();
-        $this->connection->close();
+    /**
+     * Снятие блокировки с аккаунта и удаление ключа из redis
+     * @param $id - ID аккаунта
+     */
+    private function release($id): void
+    {
+        $this->client->del('lock_' . $id);
     }
 }

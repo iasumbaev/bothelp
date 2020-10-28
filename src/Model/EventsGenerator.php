@@ -47,17 +47,27 @@ class EventsGenerator
                 $lastEventID = 0;
             }
 
-            $events = [];
             $iMax = $eventsNumber + $lastEventID;
             for ($i = $lastEventID; $i < $iMax; $i++) {
-                $events[] = (string)(new Event($accountID, $i));
+                $this->client->rpush('events', [new Event($accountID, $i)]);
             }
-
-            $this->client->rpush('events', $events);
 
             // Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER.
             // Если это критично, то можно добавить проверку при генерации $eventsNumber.
             $eventsCount += $eventsNumber;
+        }
+
+        $this->release();
+    }
+
+
+    /**
+     * Очищаем redis от ключей вида last_event_id_ID, т.к. они использовались только для генерации
+     */
+    private function release(): void
+    {
+        for ($i = 0; $i < $this->accountsNumber; $i++) {
+            $this->client->del('last_event_id_' . $i);
         }
     }
 }
