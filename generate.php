@@ -3,20 +3,17 @@
 require_once __DIR__ . '/vendor/autoload.php';
 
 use App\Model\EventsGenerator;
-use PhpAmqpLib\Connection\AMQPStreamConnection;
+use Predis\Client;
 
 
 const EVENTS_NUMBER = 10000;
 const ACCOUNTS_NUMBER = 1000;
 const LIMIT_EVENT_ON_ACCOUNT = 10;
 
-$connection = new AMQPStreamConnection('localhost', 5672, 'guest', 'guest');
-$channel = $connection->channel();
+$client = new Client([
+    'host' => 'redis',
+    'port' => 6379,
+]);
 
-$channel->queue_declare('event_queue', false, true, false, false);
-
-$generator = new EventsGenerator(EVENTS_NUMBER, ACCOUNTS_NUMBER, LIMIT_EVENT_ON_ACCOUNT, $channel);
+$generator = new EventsGenerator(EVENTS_NUMBER, ACCOUNTS_NUMBER, LIMIT_EVENT_ON_ACCOUNT, $client);
 $generator->generate();
-
-$channel->close();
-$connection->close();

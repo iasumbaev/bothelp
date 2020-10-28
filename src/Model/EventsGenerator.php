@@ -4,6 +4,7 @@ namespace App\Model;
 
 use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Channel\AMQPChannel;
+use Predis\Client;
 
 class EventsGenerator
 {
@@ -20,23 +21,22 @@ class EventsGenerator
      */
     private $limitEventOnAccount;
     /**
-     * @var AMQPChannel
+     * @var Client
      */
-    private $channel;
+    private $client;
 
-    public function __construct(int $eventsNumber, int $accountsNumber, int $limitEventOnAccount, AMQPChannel $channel)
+    public function __construct(int $eventsNumber, int $accountsNumber, int $limitEventOnAccount, Client $client)
     {
         $this->eventsNumber = $eventsNumber;
         // -1 для ограничений цикла, т.к. будем считать с 0
         $this->accountsNumber = $accountsNumber - 1;
         $this->limitEventOnAccount = $limitEventOnAccount - 1;
-        $this->channel = $channel;
+        $this->client = $client;
     }
 
     public function generate()
     {
         $eventsCount = 0;
-        $accountIDs = [];
         while ($eventsCount < $this->eventsNumber) {
 
             $accountID = random_int(0, $this->accountsNumber);
@@ -45,22 +45,19 @@ class EventsGenerator
             //Если до этого был использован такой же аккаунт, надо сохранить количество событий,
             // чтобы id событий не повторялись для одного аккаунта
             //TODO: use redis
-            if (isset($accountIDs[$accountID])) {
-                $adding = $accountIDs[$accountID];
-                $accountIDs[$accountID] += $eventsNumber;
-            } else {
-                $adding = 0;
-                $accountIDs[$accountID] = $eventsNumber;
+            $lastEventID = $this->client->get('last_event_id_' . $accountID);
+            if (is_null($lastEventID)) {
+                $lastEventID = 0;
             }
 
             $events = [];
-            for ($i = 0; $i < $eventsNumber; $i++) {
-                $events[] = (string)(new Event($accountID, $adding + $i));
+            $iMax = $eventsNumber + $lastEventID;
+            for ($i = $lastEventID; $i < $iMax; $i++) {
+                $events[] = new Event($accountID, $i);
             }
 
-            $msg = new AMQPMessage(implode(',', $events));
-
-            $this->channel->basic_publish($msg, '', 'event_queue');
+            //todo: add events to redis queue
+            $this->client->rpush('events', $events);
 
             //Может быть сгенерировано чуть больше событий, чем EVENTS_NUMBER. Если это критично, то можно добавить проверку при генерации $eventsNumber.
             $eventsCount += $eventsNumber;
