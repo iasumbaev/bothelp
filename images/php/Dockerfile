@@ -42,4 +42,4 @@ RUN curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/
 
 RUN chown -R www-data:www-data /var/www
 
-WORKDIR /var/www
+WORKDIR .
