@@ -42,6 +42,6 @@ RUN docker-php-ext-install pcntl && docker-php-ext-enable pcntl
 
 RUN curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin/ --filename=composer
 
-RUN chown -R www-data:www-data /var/www
+RUN chown -R www-data:www-data /var/www/bothelp
 
 WORKDIR /var/www/bothelp
