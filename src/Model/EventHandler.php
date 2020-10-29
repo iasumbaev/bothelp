@@ -105,21 +105,16 @@ class EventHandler
 
     public function execute(): void
     {
-        while (!$this->isQueueEmpty() && $this->hasEventID()) {
-            while (!$this->lockAccount($this->accountID, $this->eventID)) {
-                usleep(100);
-            }
-
-            sleep(1);
-
-            $this->logger->log($this->accountID, $this->eventID);
-
-            $this->release($this->accountID, $this->eventID);
-
-            if (!$this->initEvent()) {
-                return;
-            }
+        while (!$this->lockAccount($this->accountID, $this->eventID)) {
+            usleep(100);
         }
+
+        sleep(1);
+
+        $this->logger->log($this->accountID, $this->eventID);
+
+        $this->release($this->accountID, $this->eventID);
+
     }
 
     /**
