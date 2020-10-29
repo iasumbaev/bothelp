@@ -68,7 +68,7 @@ class EventHandler
         $pool = $this->client->smembers('account_' . $accountID);
 
         // Если событие первое в пуле, то его можно выполнить
-        return min($pool) === (int)$eventID;
+        return (int)min($pool) === (int)$eventID;
 
     }
 
