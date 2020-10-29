@@ -27,14 +27,15 @@ class EventHandler
         $this->logger = $logger;
 
         //lpop вернёт accountID:eventID
-        [$this->accountID, $this->eventID] = explode(':', $this->client->lpop('events'));
-        if (isset($this->eventID)) {
+        $data = $this->client->lpop('events');
+        if ($data) {
+            [$this->accountID, $this->eventID] = explode(':', $data);
             $this->addEventToAccountPoll($this->accountID, $this->eventID);
-
         }
     }
 
-    public function getEventID() {
+    public function getEventID()
+    {
         return $this->eventID;
     }
 
