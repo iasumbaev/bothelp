@@ -70,7 +70,7 @@ class EventsGenerator
      */
     private function release(): void
     {
-        for ($i = 0; $i <= $this->accountsNumber; $i++) {
+        for ($i = 1; $i <= $this->accountsNumber; $i++) {
             $this->client->del('last_event_id_' . $i);
         }
     }
