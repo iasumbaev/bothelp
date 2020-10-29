@@ -29,9 +29,9 @@ class EventHandler
         $this->initEvent();
     }
 
-    public function getEventID()
+    public function hasEventID()
     {
-        return $this->eventID;
+        return isset($this->eventID);
     }
 
     private function initEvent(): bool
