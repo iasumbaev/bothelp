@@ -1,17 +1,30 @@
-# Версия docker-compose
-version: '2'
-# Список наших сервисов (контейнеров)
-services:
-  php:
-    # у нас свой образ для PHP, указываем путь к нему и говорим что его надо собрать
-    build: ./images/php
+version: '3.1'
 
-    # монтируем директорию с проектами
-    volumes:
-      - ./www:/var/www
-    links:
-      - redis
+services:
   redis:
-    image: redis:alpine
+    image: redis:latest
     ports:
       - 6379:6379
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+
+  php:
+    build:
+      context: ./images/php
+    volumes:
+      - ./:/usr/share/bothelp:rw
+    links:
+      - redis
+    depends_on:
+      - redis
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  redis-data:
+    driver: local
