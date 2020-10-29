@@ -98,7 +98,7 @@ class EventHandler
                 usleep(100);
             }
 
-            sleep(1);
+//            sleep(1);
 
             $this->logger->log($accountID, $eventID);
 
