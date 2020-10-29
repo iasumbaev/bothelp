@@ -92,15 +92,15 @@ class EventHandler
             $this->addEventToAccountPoll($accountID, $eventID);
 
             while ($this->hasLock($accountID) || !$this->isExecutable($accountID, $eventID)) {
-                continue;
+                usleep(100);
             }
 
             //Проверка, можем ли мы заблокировать аккаунт
             while (!$this->lockAccount($accountID)) {
-                continue;
+                usleep(100);
             }
 
-//            sleep(1);
+            sleep(1);
 
             $this->logger->log($accountID, $eventID);
 
