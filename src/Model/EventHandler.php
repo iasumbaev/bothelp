@@ -65,17 +65,10 @@ class EventHandler
      */
     private function isExecutable($accountID, $eventID): bool
     {
-
         $pool = $this->client->smembers('account_' . $accountID);
-        $pool = array_map('intval', $pool);
-        sort($pool);
 
-        if (!isset($pool[0])) {
-            //TODO: think
-            exit;
-        }
         // Если событие первое в пуле, то его можно выполнить
-        return $pool[0] === (int)$eventID;
+        return min($pool) === (int)$eventID;
 
     }
 
