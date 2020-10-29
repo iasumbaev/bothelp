@@ -6,6 +6,23 @@ services:
       dockerfile: Dockerfile
       target: php_bothelp
     container_name: bothelp_php
+    volumes:
+      - ".:/var/www/bothelp"
+      - "./log:/var/www/bothelp/log"
+    networks:
+      - bothelp_network
+  nginx:
+    ports:
+      - "80:80"
+      - "8080:80"
+      - "443:443"
+    build:
+      context: ./images/nginx
+      dockerfile: Dockerfile
+      target: nginx_bothelp
+    container_name: bothelp_nginx
+    depends_on:
+      - php
     networks:
       - bothelp_network
   redis:
