@@ -13,6 +13,12 @@ function execInBackground($cmd)
     }
 }
 
+function getProcessCount($processName)
+{
+    exec("ps -A | grep -i $processName | grep -v grep", $pids);
+    return count($pids);
+}
+
 $client = new Client([
     'host' => 'localhost',
     'port' => 6379,
@@ -21,8 +27,11 @@ $client = new Client([
 file_put_contents('log.txt', '');
 
 $start = microtime(true);
-for ($i = 0; $client->llen('events') !== 0; $i++) {
-    execInBackground('php execute.php');
+$command = 'php execute.php';
+while ($client->llen('events') !== 0) {
+    if (getProcessCount($command) < 50) {
+        execInBackground($command);
+    }
 }
 
 echo 'Length now: ' . $client->llen('events') . PHP_EOL;
