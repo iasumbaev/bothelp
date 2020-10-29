@@ -88,22 +88,20 @@ class EventHandler
 
     public function execute(): void
     {
-        while (!$this->isQueueEmpty()) {
-            //lpop вернёт accountID:eventID
-            [$accountID, $eventID] = explode(':', $this->client->lpop('events'));
+        //lpop вернёт accountID:eventID
+        [$accountID, $eventID] = explode(':', $this->client->lpop('events'));
 
-            $this->addEventToAccountPoll($accountID, $eventID);
+        $this->addEventToAccountPoll($accountID, $eventID);
 
-            while (!$this->lockAccount($accountID, $eventID)) {
-                usleep(100);
-            }
+        while (!$this->lockAccount($accountID, $eventID)) {
+            usleep(100);
+        }
 
 //            sleep(1);
 
-            $this->logger->log($accountID, $eventID);
+        $this->logger->log($accountID, $eventID);
 
-            $this->release($accountID, $eventID);
-        }
+        $this->release($accountID, $eventID);
     }
 
     /**
