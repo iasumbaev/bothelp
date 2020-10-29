@@ -37,7 +37,7 @@ class EventsGenerator
         $eventsCount = 0;
         while ($eventsCount < $this->eventsNumber) {
 
-            $accountID = random_int(0, $this->accountsNumber);
+            $accountID = random_int(1, $this->accountsNumber);
             $eventsNumber = random_int(1, $this->limitEventOnAccount);
 
             // Если до этого был использован такой же аккаунт, надо сохранить количество событий,
