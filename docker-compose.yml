@@ -1,0 +1,17 @@
+# Версия docker-compose
+version: '2'
+# Список наших сервисов (контейнеров)
+services:
+  php:
+    # у нас свой образ для PHP, указываем путь к нему и говорим что его надо собрать
+    build: ./images/php
+
+    # монтируем директорию с проектами
+    volumes:
+      - ./www:/var/www
+    links:
+      - redis
+  redis:
+    image: redis:alpine
+    ports:
+      - 6379:6379
