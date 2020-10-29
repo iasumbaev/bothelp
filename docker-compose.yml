@@ -11,11 +11,7 @@ services:
   php:
     build:
       context: ./images/php
-    volumes:
-      - ./:/usr/share/bothelp:rw
     links:
-      - redis
-    depends_on:
       - redis
     networks:
       - app-network
