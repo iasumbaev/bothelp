@@ -112,7 +112,7 @@ class EventHandler
 
     public function execute(): void
     {
-        while (!$this->isQueueEmpty()) {
+        while (!$this->isQueueEmpty() && $this->hasEventID()) {
             while (!$this->lockAccount($this->accountID, $this->eventID)) {
                 usleep(100);
             }
@@ -138,5 +138,7 @@ class EventHandler
     {
         $this->client->del('lock_' . $accountID);
         $this->client->srem('account_' . $accountID, $eventID);
+        $this->accountID = null;
+        $this->eventID = null;
     }
 }
