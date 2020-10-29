@@ -23,7 +23,7 @@ file_put_contents('log.txt', '');
 $start = microtime(true);
 while ($client->llen('events')) {
     while (getHandlersCount() < 100) {
-        echo 'Start new handler: ';
+        echo 'Start new handler: ' . $client->llen('events') . PHP_EOL;
         action();
     }
 }
