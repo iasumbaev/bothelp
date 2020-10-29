@@ -9,7 +9,9 @@ function execInBackground($cmd)
     if (strpos(php_uname(), 'Windows') === 0) {
         pclose(popen("start /B " . $cmd, "r"));
     } else {
-        exec($cmd . " > /dev/null &");
+        $return = null;
+        exec($cmd . " > /dev/null &",$return);
+        echo $return;
     }
 }
 
@@ -30,7 +32,7 @@ $loopCount = 0;
 // Ожидание, пока обработчики не закончат работу
 while ($client->llen('events') !== 0) {
     $loopCount++;
-    if ($loopCount % 10000 === 0) {
+    if ($loopCount % 1000 === 0) {
         echo 'Length now: ' . $client->llen('events') . PHP_EOL;
     }
 }
