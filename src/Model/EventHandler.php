@@ -34,16 +34,14 @@ class EventHandler
         return isset($this->eventID);
     }
 
-    private function initEvent(): bool
+    private function initEvent()
     {
         //lpop вернёт accountID:eventID
         $data = $this->client->lpop('events');
         if ($data) {
             [$this->accountID, $this->eventID] = explode(':', $data);
             $this->addEventToAccountPoll($this->accountID, $this->eventID);
-            return true;
         }
-        return false;
     }
 
 
@@ -106,7 +104,7 @@ class EventHandler
     public function execute(): bool
     {
         while (!$this->lockAccount($this->accountID, $this->eventID)) {
-            usleep(100);
+            continue;
         }
 
         sleep(1);

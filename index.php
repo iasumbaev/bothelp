@@ -3,9 +3,14 @@
 use Predis\Client;
 
 require_once __DIR__ . '/vendor/autoload.php';
-function action(): void
+
+function execInBackground($cmd)
 {
-    exec('php execute.php > /dev/null &');
+    if (strpos(php_uname(), 'Windows') === 0) {
+        pclose(popen("start /B " . $cmd, "r"));
+    } else {
+        exec($cmd . " > /dev/null &");
+    }
 }
 
 $client = new Client([
@@ -16,8 +21,8 @@ $client = new Client([
 file_put_contents('log.txt', '');
 
 $start = microtime(true);
-for ($i = 0; $i < 10 && $client->llen('events') !== 0; $i++) {
-    action();
+for ($i = 0; $i < 300 && $client->llen('events') !== 0; $i++) {
+    execInBackground('php execute.php');
 }
 
 echo 'Length now: ' . $client->llen('events') . PHP_EOL;
@@ -25,7 +30,7 @@ $loopCount = 0;
 // Ожидание, пока обработчики не закончат работу
 while ($client->llen('events') !== 0) {
     $loopCount++;
-    if ($loopCount % 1000 === 0) {
+    if ($loopCount % 10000 === 0) {
         echo 'Length now: ' . $client->llen('events') . PHP_EOL;
     }
 }
