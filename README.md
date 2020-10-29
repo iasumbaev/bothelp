@@ -9,5 +9,5 @@
 
 `make events-process`
 
-##Лог
+## Лог
 `log/log.txt`
