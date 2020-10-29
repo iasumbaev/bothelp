@@ -26,8 +26,7 @@ class EventsGenerator
     public function __construct(int $eventsNumber, int $accountsNumber, int $limitEventOnAccount, Client $client)
     {
         $this->eventsNumber = $eventsNumber;
-        // -1 т.к. будем считать с 0
-        $this->accountsNumber = $accountsNumber - 1;
+        $this->accountsNumber = $accountsNumber;
         $this->limitEventOnAccount = $limitEventOnAccount;
         $this->client = $client;
     }
@@ -44,7 +43,7 @@ class EventsGenerator
             // чтобы id событий не повторялись для одного аккаунта
             $lastEventID = $this->client->get('last_event_id_' . $accountID);
             if (is_null($lastEventID)) {
-                $lastEventID = 0;
+                $lastEventID = 1;
             }
 
             $iMax = $eventsNumber + $lastEventID;

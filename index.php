@@ -4,12 +4,13 @@ use Predis\Client;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+
 function execInBackground($cmd)
 {
     if (strpos(php_uname(), 'Windows') === 0) {
         pclose(popen("start /B " . $cmd, "r"));
     } else {
-        passthru($cmd . " > /dev/null &");
+        exec($cmd . " > /dev/null &");
     }
 }
 
@@ -21,7 +22,7 @@ $client = new Client([
 file_put_contents('log.txt', '');
 
 $start = microtime(true);
-for ($i = 0; $client->llen('events') !== 0; $i++) {
+for ($i = 0; $i < 100 && $client->llen('events') !== 0; $i++) {
     execInBackground('php execute.php');
 }
 
