@@ -78,8 +78,11 @@ class EventHandler
      * @param $accountID - ID аккаунта
      * @return int
      */
-    private function lockAccount($accountID): int
+    private function lockAccount($accountID, $eventID): int
     {
+        if(!$this->isExecutable($accountID, $eventID)) {
+            return 0;
+        }
         return $this->client->setnx('lock_' . $accountID, true);
     }
 
@@ -96,7 +99,7 @@ class EventHandler
             }
 
             //Проверка, можем ли мы заблокировать аккаунт
-            while (!$this->lockAccount($accountID)) {
+            while (!$this->lockAccount($accountID, $eventID)) {
                 usleep(100);
             }
 
