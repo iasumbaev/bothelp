@@ -9,7 +9,7 @@ function execInBackground($cmd)
     if (strpos(php_uname(), 'Windows') === 0) {
         pclose(popen("start /B " . $cmd, "r"));
     } else {
-        passthru($cmd . " > /dev/null &");
+        exec($cmd . " > /dev/null &");
     }
 }
 
@@ -28,7 +28,7 @@ file_put_contents('log.txt', '');
 
 $start = microtime(true);
 $command = 'php execute.php';
-for ($i = 0; $i < 100 && $client->llen('events'); $i++) {
+for ($i = 0; $i < 10 && $client->llen('events'); $i++) {
 //while ($client->llen('events') !== 0) {
 //    if (getProcessCount($command) < 50) {
     execInBackground($command);
