@@ -16,7 +16,7 @@ $client = new Client([
 file_put_contents('log.txt', '');
 
 $start = microtime(true);
-for ($i = 0; $i < 100 && $client->llen('events') !== 0; $i++) {
+for ($i = 0; $i < 10 && $client->llen('events') !== 0; $i++) {
     action();
 }
 

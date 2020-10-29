@@ -80,7 +80,7 @@ class EventHandler
      */
     private function lockAccount($accountID, $eventID): int
     {
-        if(!$this->isExecutable($accountID, $eventID)) {
+        if (!$this->isExecutable($accountID, $eventID)) {
             return 0;
         }
         return $this->client->setnx('lock_' . $accountID, true);
@@ -94,11 +94,6 @@ class EventHandler
 
             $this->addEventToAccountPoll($accountID, $eventID);
 
-            while ($this->hasLock($accountID) || !$this->isExecutable($accountID, $eventID)) {
-                usleep(100);
-            }
-
-            //Проверка, можем ли мы заблокировать аккаунт
             while (!$this->lockAccount($accountID, $eventID)) {
                 usleep(100);
             }
