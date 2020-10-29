@@ -17,10 +17,19 @@ class EventHandler
      */
     private $logger;
 
+    private $accountID;
+
+    private $eventID;
+
     public function __construct(Client $client, Logger $logger)
     {
         $this->client = $client;
         $this->logger = $logger;
+
+        //lpop вернёт accountID:eventID
+        [$this->accountID, $this->eventID] = explode(':', $this->client->lpop('events'));
+
+        $this->addEventToAccountPoll($this->accountID, $this->eventID);
     }
 
     /**
@@ -88,20 +97,16 @@ class EventHandler
 
     public function execute(): void
     {
-        //lpop вернёт accountID:eventID
-        [$accountID, $eventID] = explode(':', $this->client->lpop('events'));
 
-        $this->addEventToAccountPoll($accountID, $eventID);
-
-        while (!$this->lockAccount($accountID, $eventID)) {
+        while (!$this->lockAccount($this->accountID, $this->eventID)) {
             usleep(100);
         }
 
 //            sleep(1);
 
-        $this->logger->log($accountID, $eventID);
+        $this->logger->log($this->accountID, $this->eventID);
 
-        $this->release($accountID, $eventID);
+        $this->release($this->accountID, $this->eventID);
     }
 
     /**
