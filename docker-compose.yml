@@ -1,43 +1,21 @@
-version: '3.1'
-
+version: "3.7"
 services:
-  redis:
-    image: redis:latest
-    ports:
-      - 6379:6379
-    volumes:
-      - redis-data:/data
-    networks:
-      - app-network
-
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    environment:
-      - REDIS_HOSTS=local:redis:6379
-      - HTTP_USER=root
-      - HTTP_PASSWORD=root
-    ports:
-      - 8081:8081
-    depends_on:
-      - redis
-    networks:
-      - app-network
-
   php:
     build:
       context: ./images/php
-    volumes:
-      - ./:/usr/share/bothelp:rw
-    links:
-      - redis
-    depends_on:
-      - redis
+      dockerfile: Dockerfile
+      target: php_bothelp
+    container_name: bothelp_php
     networks:
-      - app-network
-
+      - bothelp_network
+  redis:
+    container_name: bothelp_redis
+    image: redis:alpine
+    command: ["sh", "-c", "exec redis-server"]
+    volumes:
+      - "./redis-data:/var/lib/redis"
+    networks:
+      - bothelp_network
 networks:
-  app-network:
-
-volumes:
-  redis-data:
-    driver: local
+  bothelp_network:
+    driver: bridge
