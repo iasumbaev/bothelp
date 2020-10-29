@@ -8,11 +8,6 @@ function action(): void
     exec('php execute.php > /dev/null &');
 }
 
-function getHandlersCount(): int
-{
-    return (int)exec('ps aux | grep -v grep | grep -c "execute.php"');
-}
-
 $client = new Client([
     'host' => 'localhost',
     'port' => 6379,
@@ -21,10 +16,8 @@ $client = new Client([
 file_put_contents('log.txt', '');
 
 $start = microtime(true);
-while ($client->llen('events')) {
-    while (getHandlersCount() < 100) {
-        action();
-    }
+for ($i = 0; $i < 100 && $client->llen('events') !== 0; $i++) {
+    action();
 }
 
 echo 'Length now: ' . $client->llen('events') . PHP_EOL;

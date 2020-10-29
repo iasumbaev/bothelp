@@ -26,18 +26,26 @@ class EventHandler
         $this->client = $client;
         $this->logger = $logger;
 
-        //lpop вернёт accountID:eventID
-        $data = $this->client->lpop('events');
-        if ($data) {
-            [$this->accountID, $this->eventID] = explode(':', $data);
-            $this->addEventToAccountPoll($this->accountID, $this->eventID);
-        }
+        $this->initEvent();
     }
 
     public function getEventID()
     {
         return $this->eventID;
     }
+
+    private function initEvent(): bool
+    {
+        //lpop вернёт accountID:eventID
+        $data = $this->client->lpop('events');
+        if ($data) {
+            [$this->accountID, $this->eventID] = explode(':', $data);
+            $this->addEventToAccountPoll($this->accountID, $this->eventID);
+            return true;
+        }
+        return false;
+    }
+
 
     /**
      * Добавление события в пул событий аккаунтов
@@ -104,16 +112,21 @@ class EventHandler
 
     public function execute(): void
     {
+        while (!$this->isQueueEmpty()) {
+            while (!$this->lockAccount($this->accountID, $this->eventID)) {
+                usleep(100);
+            }
 
-        while (!$this->lockAccount($this->accountID, $this->eventID)) {
-            usleep(100);
+            sleep(1);
+
+            $this->logger->log($this->accountID, $this->eventID);
+
+            $this->release($this->accountID, $this->eventID);
+
+            if (!$this->initEvent()) {
+                return;
+            }
         }
-
-//            sleep(1);
-
-        $this->logger->log($this->accountID, $this->eventID);
-
-        $this->release($this->accountID, $this->eventID);
     }
 
     /**
