@@ -36,11 +36,6 @@ RUN docker-php-source extract \
         zip \
         curl \
     && docker-php-ext-install intl && docker-php-ext-enable intl \
-    && pecl install imagick && docker-php-ext-enable imagick \
-    && pecl install mcrypt && docker-php-ext-enable mcrypt \
-    && pecl install mailparse && docker-php-ext-enable mailparse \
-    && pecl install redis && docker-php-ext-enable redis \
-    && pecl install mongodb && docker-php-ext-enable mongodb \
     && docker-php-source delete
 
 RUN docker-php-ext-install pcntl && docker-php-ext-enable pcntl
@@ -49,20 +44,4 @@ RUN curl -s https://getcomposer.org/installer | php -- --install-dir=/usr/local/
 
 RUN chown -R www-data:www-data /var/www
 
-# Production mode as default
-RUN cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-
-WORKDIR /var/www
-
-
-# Editors
-RUN apt-get update && apt-get install -y vim
-
-# XDebug
-RUN pecl install xdebug \
-    && docker-php-ext-enable xdebug \
-    && echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.remote_autostart=0" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.remote_connect_back=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.remote_handler=dbgp" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
-    && echo "xdebug.remote_port=9000" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+WORKDIR /var/www/bothelp
