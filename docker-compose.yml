@@ -1,0 +1,24 @@
+version: "3.7"
+services:
+  php:
+    build:
+      context: ./images/php
+      dockerfile: Dockerfile
+      target: php_bothelp
+    container_name: bothelp_php
+    volumes:
+      - ".:/var/www/bothelp"
+      - "./log:/var/www/bothelp/log"
+    networks:
+      - bothelp_network
+  redis:
+    container_name: bothelp_redis
+    image: redis:alpine
+    command: ["sh", "-c", "exec redis-server"]
+    volumes:
+      - "./redis-data:/var/lib/redis"
+    networks:
+      - bothelp_network
+networks:
+  bothelp_network:
+    driver: bridge

@@ -5,16 +5,15 @@ require_once __DIR__ . '/vendor/autoload.php';
 use App\Model\EventsGenerator;
 use Predis\Client;
 
-const EVENTS_NUMBER = 10000;
-const ACCOUNTS_NUMBER = 1000;
-const LIMIT_EVENT_ON_ACCOUNT = 10;
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
 $client = new Client([
-    'host' => 'localhost',
-    'port' => 6379,
+    'host' => $_ENV['redis_host'],
+    'port' => $_ENV['redis_port'],
 ]);
 
 $client->flushall();
 
-$generator = new EventsGenerator(EVENTS_NUMBER, ACCOUNTS_NUMBER, LIMIT_EVENT_ON_ACCOUNT, $client);
+$generator = new EventsGenerator($_ENV['EVENTS_NUMBER'], $_ENV['ACCOUNTS_NUMBER'], $_ENV['LIMIT_EVENT_ON_ACCOUNT'], $client);
 $generator->generate();

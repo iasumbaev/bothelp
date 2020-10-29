@@ -3,36 +3,38 @@
 use Predis\Client;
 
 require_once __DIR__ . '/vendor/autoload.php';
-
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
 function execInBackground($cmd)
 {
     if (strpos(php_uname(), 'Windows') === 0) {
-        pclose(popen("start /B " . $cmd, "r"));
+        pclose(popen('start /B ' . $cmd, 'r'));
     } else {
-        exec($cmd . " > /dev/null &");
+        exec($cmd . ' > /dev/null &');
     }
 }
 
 $client = new Client([
-    'host' => 'localhost',
-    'port' => 6379,
+    'host' => $_ENV['redis_host'],
+    'port' => $_ENV['redis_port'],
 ]);
 
-file_put_contents('log.txt', '');
+//чистим логи
+file_put_contents($_ENV['log_path'], '');
+
+$command = 'php execute.php';
 
 $start = microtime(true);
-for ($i = 0; $i < 100 && $client->llen('events') !== 0; $i++) {
-    execInBackground('php execute.php');
+for ($i = 0; $i < $_ENV['HANDLERS_NUMBER'] && $client->llen('events'); $i++) {
+    execInBackground($command);
 }
 
-echo 'Length now: ' . $client->llen('events') . PHP_EOL;
 $loopCount = 0;
 // Ожидание, пока обработчики не закончат работу
 while ($client->llen('events') !== 0) {
-    $loopCount++;
-    if ($loopCount % 1000 === 0) {
-        echo 'Length now: ' . $client->llen('events') . PHP_EOL;
+    if ($loopCount++ % 1000 === 0) {
+        echo 'Queue size: ' . $client->llen('events') . PHP_EOL;
     }
 }
 

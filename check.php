@@ -1,6 +1,6 @@
 <?php
 
-$lines = explode(PHP_EOL, file_get_contents('log.txt'));
+$lines = explode(PHP_EOL, file_get_contents('log/log.txt'));
 
 $data = [];
 foreach ($lines as $index => $line) {
