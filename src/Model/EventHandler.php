@@ -103,7 +103,7 @@ class EventHandler
         return $this->client->setnx('lock_' . $accountID, true);
     }
 
-    public function execute(): void
+    public function execute(): bool
     {
         while (!$this->lockAccount($this->accountID, $this->eventID)) {
             usleep(100);
@@ -115,6 +115,7 @@ class EventHandler
 
         $this->release($this->accountID, $this->eventID);
 
+        return true;
     }
 
     /**
