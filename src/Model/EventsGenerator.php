@@ -37,14 +37,14 @@ class EventsGenerator
         $eventsCount = 0;
         while ($eventsCount < $this->eventsNumber) {
 
-            $accountID = random_int(0, $this->accountsNumber);
+            $accountID = random_int(1, $this->accountsNumber);
             $eventsNumber = random_int(1, $this->limitEventOnAccount);
 
             // Если до этого был использован такой же аккаунт, надо сохранить количество событий,
             // чтобы id событий не повторялись для одного аккаунта
             $lastEventID = $this->client->get('last_event_id_' . $accountID);
             if (is_null($lastEventID)) {
-                $lastEventID = 0;
+                $lastEventID = 1;
             }
 
             $iMax = $eventsNumber + $lastEventID;
@@ -70,7 +70,7 @@ class EventsGenerator
      */
     private function release(): void
     {
-        for ($i = 0; $i <= $this->accountsNumber; $i++) {
+        for ($i = 1; $i <= $this->accountsNumber; $i++) {
             $this->client->del('last_event_id_' . $i);
         }
     }
