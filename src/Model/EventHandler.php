@@ -8,6 +8,12 @@ use Predis\Client;
 class EventHandler
 {
 
+    private const ACCOUNTS_POOL_NAME = 'accounts_';
+
+    private const QUEUE_NAME = 'events';
+
+    private const ACCOUNT_LOCK_NAME = 'lock_';
+
     /**
      * @var Client
      */
@@ -29,85 +35,60 @@ class EventHandler
         $this->initEvent();
     }
 
-    public function hasEventID()
+    public function hasEventID(): bool
     {
-        return isset($this->eventID);
+        return (bool)$this->eventID;
     }
 
-    private function initEvent()
+    private function initEvent(): void
     {
         //lpop вернёт accountID:eventID
-        $data = $this->client->lpop('events');
+        $data = $this->client->lpop(self::QUEUE_NAME);
         if ($data) {
             [$this->accountID, $this->eventID] = explode(':', $data);
-            $this->addEventToAccountPoll($this->accountID, $this->eventID);
+            $this->addEventToAccountPoll();
         }
     }
 
-
     /**
      * Добавление события в пул событий аккаунтов
-     * @param $accountID - ID аккаунта
-     * @param $eventID - ID события
      */
-    private function addEventToAccountPoll($accountID, $eventID): void
+    private function addEventToAccountPoll(): void
     {
-        $this->client->sadd('account_' . $accountID, $eventID);
+        $this->client->sadd(self::ACCOUNTS_POOL_NAME . $this->accountID, $this->eventID);
     }
 
     /**
      * Проверка на то, что событие можно исполнить
-     * @param $accountID - ID аккаунта
-     * @param $eventID - ID события
      * @return bool
      */
-    private function isExecutable($accountID, $eventID): bool
+    private function isExecutable(): bool
     {
-        $pool = $this->client->smembers('account_' . $accountID);
+        $pool = $this->client->smembers(self::ACCOUNTS_POOL_NAME . $this->accountID);
 
         // Если событие первое в пуле, то его можно выполнить
-        return (int)min($pool) === (int)$eventID;
-
-    }
-
-    /**
-     * Проверка есть ли ещё необработанные события
-     */
-    private function isQueueEmpty(): bool
-    {
-        return $this->client->llen('events') === 0;
-    }
-
-    /**
-     * Проверка есть ли блокировка на аккаунт
-     * @param $id - ID аккаунта
-     * @return int - 1 если аккаунт заблокирован, иначе 0
-     */
-    private function hasLock($id): int
-    {
-        return $this->client->exists('lock_' . $id);
+        return (int)min($pool) === (int)$this->eventID;
     }
 
     /**
      * Блокировка аккаунта для выполнения событий
-     * @param $accountID - ID аккаунта
-     * @return int
+     * @return bool
      */
-    private function lockAccount($accountID, $eventID): int
+    private function lockAccount(): bool
     {
-        if (!$this->isExecutable($accountID, $eventID)) {
-            return 0;
+        if (!$this->isExecutable()) {
+            return false;
         }
-        return $this->client->setnx('lock_' . $accountID, true);
+        return (bool)$this->client->setnx(self::ACCOUNT_LOCK_NAME . $this->accountID, true);
     }
 
     public function execute(): bool
     {
-        while (!$this->lockAccount($this->accountID, $this->eventID)) {
+        while (!$this->lockAccount()) {
             continue;
         }
 
-//        sleep(1);
+        sleep(1);
 
         $this->logger->log($this->accountID, $this->eventID);
 
@@ -123,8 +104,8 @@ class EventHandler
      */
     private function release($accountID, $eventID): void
     {
-        $this->client->del('lock_' . $accountID);
-        $this->client->srem('account_' . $accountID, $eventID);
+        $this->client->del(self::ACCOUNT_LOCK_NAME . $accountID);
+        $this->client->srem(self::ACCOUNTS_POOL_NAME . $accountID, $eventID);
         $this->accountID = null;
         $this->eventID = null;
     }
