@@ -26,7 +26,7 @@ class EventHandler
         $this->client = $client;
         $this->logger = $logger;
 
-        $this->initEvent();
+//        $this->initEvent();
     }
 
     public function hasEventID()
@@ -41,7 +41,9 @@ class EventHandler
         if ($data) {
             [$this->accountID, $this->eventID] = explode(':', $data);
             $this->addEventToAccountPoll($this->accountID, $this->eventID);
+            return true;
         }
+        return false;
     }
 
 
@@ -103,17 +105,17 @@ class EventHandler
 
     public function execute(): bool
     {
-        while (!$this->lockAccount($this->accountID, $this->eventID)) {
-            continue;
+        while ($this->initEvent()) {
+            while (!$this->lockAccount($this->accountID, $this->eventID)) {
+                continue;
+            }
+
+            sleep(1);
+
+            $this->logger->log($this->accountID, $this->eventID);
+
+            $this->release($this->accountID, $this->eventID);
         }
-
-        sleep(1);
-
-        $this->logger->log($this->accountID, $this->eventID);
-
-        $this->release($this->accountID, $this->eventID);
-
-        return true;
     }
 
     /**
