@@ -17,11 +17,33 @@ class EventHandler
      */
     private $logger;
 
+    private $accountID;
+
+    private $eventID;
+
     public function __construct(Client $client, Logger $logger)
     {
         $this->client = $client;
         $this->logger = $logger;
+
+        $this->initEvent();
     }
+
+    public function hasEventID()
+    {
+        return isset($this->eventID);
+    }
+
+    private function initEvent()
+    {
+        //lpop вернёт accountID:eventID
+        $data = $this->client->lpop('events');
+        if ($data) {
+            [$this->accountID, $this->eventID] = explode(':', $data);
+            $this->addEventToAccountPoll($this->accountID, $this->eventID);
+        }
+    }
+
 
     /**
      * Добавление события в пул событий аккаунтов
@@ -41,13 +63,10 @@ class EventHandler
      */
     private function isExecutable($accountID, $eventID): bool
     {
-
         $pool = $this->client->smembers('account_' . $accountID);
-        $pool = array_map('intval', $pool);
-        sort($pool);
 
         // Если событие первое в пуле, то его можно выполнить
-        return $pool[0] === (int)$eventID;
+        return (int)min($pool) === (int)$eventID;
 
     }
 
@@ -72,32 +91,29 @@ class EventHandler
     /**
      * Блокировка аккаунта для выполнения событий
      * @param $accountID - ID аккаунта
+     * @return int
      */
-    private function lockAccount($accountID): void
+    private function lockAccount($accountID, $eventID): int
     {
-        $this->client->set('lock_' . $accountID, true);
+        if (!$this->isExecutable($accountID, $eventID)) {
+            return 0;
+        }
+        return $this->client->setnx('lock_' . $accountID, true);
     }
 
-    public function execute(): void
+    public function execute(): bool
     {
-        while (!$this->isQueueEmpty()) {
-            //lpop вернёт accountID:eventID
-            [$accountID, $eventID] = explode(':', $this->client->lpop('events'));
-
-            $this->addEventToAccountPoll($accountID, $eventID);
-
-            while ($this->hasLock($accountID) || !$this->isExecutable($accountID, $eventID)) {
-                usleep(100);
-            }
-
-            $this->lockAccount($accountID);
-
-            sleep(1);
-
-            $this->logger->log($accountID, $eventID);
-
-            $this->release($accountID, $eventID);
+        while (!$this->lockAccount($this->accountID, $this->eventID)) {
+            continue;
         }
+
+        sleep(1);
+
+        $this->logger->log($this->accountID, $this->eventID);
+
+        $this->release($this->accountID, $this->eventID);
+
+        return true;
     }
 
     /**
@@ -109,5 +125,7 @@ class EventHandler
     {
         $this->client->del('lock_' . $accountID);
         $this->client->srem('account_' . $accountID, $eventID);
+        $this->accountID = null;
+        $this->eventID = null;
     }
 }

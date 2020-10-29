@@ -26,14 +26,14 @@ for ($i = 0; $i < 100 && $client->llen('events') !== 0; $i++) {
     execInBackground('php execute.php');
 }
 
-// Ожидание, пока обработчики не закончат работу
+echo 'Length now: ' . $client->llen('events') . PHP_EOL;
 $loopCount = 0;
+// Ожидание, пока обработчики не закончат работу
 while ($client->llen('events') !== 0) {
     $loopCount++;
     if ($loopCount % 1000 === 0) {
-        echo 'Length: ' . $client->llen('events'). PHP_EOL;
+        echo 'Length now: ' . $client->llen('events') . PHP_EOL;
     }
-    continue;
 }
 
 echo 'Done! Time: ' . (microtime(true) - $start) . PHP_EOL;
