@@ -28,7 +28,7 @@ file_put_contents('log.txt', '');
 
 $start = microtime(true);
 $command = 'php execute.php';
-for ($i = 0; $i < 50 && $client->llen('events'); $i++) {
+for ($i = 0; $i < 100 && $client->llen('events'); $i++) {
 //while ($client->llen('events') !== 0) {
 //    if (getProcessCount($command) < 50) {
     execInBackground($command);
