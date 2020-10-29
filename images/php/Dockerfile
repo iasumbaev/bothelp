@@ -8,4 +8,4 @@ RUN apt-get update \
 ADD https://getcomposer.org/composer.phar /usr/bin/composer
 RUN chmod 775 /usr/bin/composer
 
-WORKDIR .
+WORKDIR /var/www/bothelp
