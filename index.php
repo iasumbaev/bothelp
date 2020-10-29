@@ -29,11 +29,11 @@ file_put_contents('log.txt', '');
 $start = microtime(true);
 $command = 'php execute.php';
 //for ($i = 0; $i < 10 && $client->llen('events'); $i++) {
-//while ($client->llen('events') !== 0) {
+while ($client->llen('events') !== 0) {
 if (getProcessCount($command) < 50) {
     execInBackground($command);
 }
-//}
+}
 
 echo 'Length now: ' . $client->llen('events') . PHP_EOL;
 $loopCount = 0;
