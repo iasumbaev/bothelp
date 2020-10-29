@@ -10,6 +10,7 @@ function execInBackground($cmd)
         pclose(popen("start /B " . $cmd, "r"));
     } else {
         passthru($cmd . " > /dev/null &", $return);
+        echo  $return;
     }
 }
 
