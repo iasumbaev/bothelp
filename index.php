@@ -9,8 +9,7 @@ function execInBackground($cmd)
     if (strpos(php_uname(), 'Windows') === 0) {
         pclose(popen("start /B " . $cmd, "r"));
     } else {
-        passthru($cmd . " > /dev/null &", $return);
-        echo  $return;
+        passthru($cmd . " > /dev/null &");
     }
 }
 

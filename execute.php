@@ -19,4 +19,3 @@ if ($handler->hasEventID()) {
 //while ($handler->hasEventID() && $handler->execute()) {
 //    $handler = new EventHandler($client, new Logger());
 //}
-exit(getmygid());
