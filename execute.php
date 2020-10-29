@@ -13,4 +13,6 @@ $client = new Client([
 ]);
 
 $handler = new EventHandler($client, new Logger());
-$handler->execute();
+if($handler->getEventID()) {
+    $handler->execute();
+}
