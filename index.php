@@ -5,7 +5,7 @@ use Predis\Client;
 require_once __DIR__ . '/vendor/autoload.php';
 function action(): void
 {
-    exec('php execute.php > /dev/null 2>&1 &');
+    exec('php execute.php > /dev/null &');
 }
 
 $client = new Client([
@@ -20,12 +20,13 @@ for ($i = 0; $i < 100 && $client->llen('events') !== 0; $i++) {
     action();
 }
 
+echo 'Length now: ' . $client->llen('events') . PHP_EOL;
 $loopCount = 0;
 // Ожидание, пока обработчики не закончат работу
 while ($client->llen('events') !== 0) {
     $loopCount++;
     if ($loopCount % 1000 === 0) {
-        echo 'Waiting...' . PHP_EOL;
+        echo 'Length now: ' . $client->llen('events') . PHP_EOL;
     }
 }
 
